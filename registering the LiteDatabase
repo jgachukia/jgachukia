@@ -1,0 +1,3 @@
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton<ILiteDatabase, LiteDatabase>(_ => new LiteDatabase("short-links.db"));
+await using var app = builder.Build();
