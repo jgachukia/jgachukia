@@ -1,0 +1,40 @@
+
+
+app.MapPost("/url", ShortenerDelegate);
+
+static async Task ShortenerDelegate(HttpContext httpContext)
+{
+    var request = await httpContext.Request.ReadFromJsonAsync<UrlDto>();
+
+    if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var inputUri))
+    {
+        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+        await httpContext.Response.WriteAsync("URL is invalid.");
+        return;
+    }
+
+    var liteDb = httpContext.RequestServices.GetRequiredService<ILiteDatabase>();
+    var links = liteDb.GetCollection<ShortUrl>(BsonAutoId.Int32);
+    var entry = new ShortUrl(inputUri);
+    links.Insert(entry);
+
+    var result = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}/{entry.UrlChunk}";
+    await httpContext.Response.WriteAsJsonAsync(new { url = result });
+}
+
+public class UrlDto
+{
+    public string Url { get; set; }
+}
+
+public class ShortUrl
+{
+    public int Id { get; protected set; }
+    public string Url { get; protected set; }
+    public string UrlChunk => WebEncoders.Base64UrlEncode(BitConverter.GetBytes(Id));
+
+    public ShortUrl(Uri url)
+    {
+        Url = url.ToString();
+    }
+}
