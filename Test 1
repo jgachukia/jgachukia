@@ -1,0 +1,49 @@
+  private static string Shortener(int num)
+        {
+            string AFDS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+            string result = string.Empty;
+            if (num < 0)
+            {
+                result += "-";
+                num = Math.Abs(num);
+            }
+            int len = AFDS.Length;
+            int index = 0;
+            while (num >= Math.Pow(len, index))
+            {
+                index++;
+            }
+            index--;
+            while (index >= 0)
+            {
+                int pow = (int)Math.Pow(len, index);
+                int div = num / pow;
+                result += AFDS[div];
+                num -= pow * div;
+                index--;
+            }
+            return result;
+        }
+
+        private static  int Expander( string s)
+        {
+            string CHRS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+            int result = 0;
+            int len = AFDS.Length;
+            int index = 0;
+            var chars = s.ToCharArray();
+            foreach (char c in chars.Reverse().Where(x => x != '-'))
+            {
+                int pow = (int)Math.Pow(len, index);
+                int ind = CHRS.IndexOf(c);
+                result += pow * ind;
+                index++;
+            }
+            if (chars.First() == '-')
+            {
+                result *= -1;
+            }
+            return result;
+        }
